@@ -10,80 +10,104 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
-  id          String        @id @default(uuid())
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  name        String
-  lastname    String
-  email       String        @unique
-  password    String
-  active      Boolean       @default(true)
-  // hay que definir los roles que puede tener un usuario
-  // pero más adelnate
-  // role      String        @default("user")
-  solicitudes Solicitudes[]
+model Role {
+  id    String @id @default(uuid())
+  name  String @unique
+  users User[]
 }
 
-model Solicitudes {
-  id            String   @id @default(uuid())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  items         Items[]
-  // notificacion   Notificaciones? @relation(fields: [notificacionId], references: [id])
-  // notificacionId String          @unique
-  solicitante   Users    @relation(fields: [solicitanteId], references: [id])
-  solicitanteId String
-}
-
-model Items {
-  id          String      @id @default(uuid())
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  nombre      String
-  marca       String
-  serie       String
-  // itemUbicacion      ItemsEnUbicacion @relation(fields: [itemsEnUbicacionId], references: [id])
-  // itemsEnUbicacionId String
-  ubicacion   Ubicaciones @relation(fields: [ubicacionId], references: [id])
-  ubicacionId String
-  solicitud   Solicitudes @relation(fields: [solicitudId], references: [id])
-  solicitudId String
-}
-
-model Ubicaciones {
+model User {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  items     Items[]
-  // Para los dotos siguientes, se deben crear las tablas correspondientes 
-  // sector         String
-  // En particular, este tipo de dato se puede derivar en un enum
-  // https://www.prisma.io/docs/orm/prisma-schema/data-model/models#defining-enums
-  // tipoDeUbicacion String
+  name      String
+  lastName  String
+  email     String   @unique
+  password  String
+  active    Boolean  @default(true)
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id])
+
+  // Relationships
+  books    Book[]    @relation("BooksCreatedByUser")
+  rentals  Rental[]  @relation("RentalsByUser")
+  student  Student?
 }
 
-// Las notificionaciones no se almacenan en la base de datos
-// Se pueden derivar a partir de las solicitudes
-// y su visibilidad por parte de los usuarios puede almacenarse en la 
-// local storage del navegador
-//
-// model Notificaciones {
-//   id        String       @id @default(uuid())
-//   createdAt DateTime     @default(now())
-//   updatedAt DateTime     @updatedAt
-//   solicitud Solicitudes?
-// }
+model Student {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  studentId    String   @unique
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  enrollmentDate DateTime
 
-// Hasta que no se justifique la razon de esta tabla
-// queda comentada para evitar la creacion de tablas innecesarias
-// Consultar con las personas que esten a cargo cual era su proposito
-//
-// model ItemsEnUbicacion {
-//   id        String      @id @default(uuid())
-//   createdAt DateTime    @default(now())
-//   updatedAt DateTime    @updatedAt
-//   cantidad  Int
-//   item      Items
-//   ubicacion Ubicaciones 
-// }
+  // Relationships
+  rentals     Rental[]
+}
+
+model Book {
+  id                String   @id @default(uuid())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  title             String
+  publicationDate   DateTime
+  authorId          String
+  publisherId       String
+  categoryId        String
+  createdById       String
+
+  // Relationships
+  author            Author    @relation(fields: [authorId], references: [id])
+  publisher         Publisher @relation(fields: [publisherId], references: [id])
+  category          Category  @relation(fields: [categoryId], references: [id])
+  createdBy         User      @relation("BooksCreatedByUser", fields: [createdById], references: [id])
+  rentals           Rental[]  @relation("RentalsByBook")
+}
+
+model Rental {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  bookId     String
+  userId     String
+  studentId  String
+  rentDate   DateTime
+  returnDate DateTime
+
+  // Relationships
+  book       Book     @relation("RentalsByBook", fields: [bookId], references: [id])
+  user       User     @relation("RentalsByUser", fields: [userId], references: [id])
+  student    Student  @relation(fields: [studentId], references: [id])
+}
+
+model Author {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+
+  // Relationships
+  books     Book[]
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+
+  // Relationships
+  books     Book[]
+}
+
+model Publisher {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+
+  // Relationships
+  books     Book[]
+}
