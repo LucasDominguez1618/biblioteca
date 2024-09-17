@@ -1,0 +1,43 @@
+{
+  "name": "next-auth-template",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "tests:e2e": "bun run build && bunx playwright test",
+    "tests": "bunx playwright test",
+    "create:scene": "bunx playwright codegen",
+    "lint": "next lint",
+    "init": "bunx prisma migrate dev --name init"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@fontsource/roboto": "^5.0.14",
+    "@mui/icons-material": "^5.16.0",
+    "@mui/material": "^5.16.7",
+    "@prisma/client": "5.19.1",
+    "axios": "^1.7.2",
+    "next": "14.2.4",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-hook-form": "^7.52.1",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.3",
+    "@types/bun": "latest",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.4",
+    "prisma": "5.19.1",
+    "typescript": "^5"
+  },
+  "module": "index.ts",
+  "type": "module"
+}

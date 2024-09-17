@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id          String        @id @default(uuid())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  name        String
+  lastname    String
+  email       String        @unique
+  password    String
+  active      Boolean       @default(true)
+  // hay que definir los roles que puede tener un usuario
+  // pero más adelnate
+  // role      String        @default("user")
+  solicitudes Solicitudes[]
+}
+
+model Solicitudes {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  items         Items[]
+  // notificacion   Notificaciones? @relation(fields: [notificacionId], references: [id])
+  // notificacionId String          @unique
+  solicitante   Users    @relation(fields: [solicitanteId], references: [id])
+  solicitanteId String
+}
+
+model Items {
+  id          String      @id @default(uuid())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  nombre      String
+  marca       String
+  serie       String
+  // itemUbicacion      ItemsEnUbicacion @relation(fields: [itemsEnUbicacionId], references: [id])
+  // itemsEnUbicacionId String
+  ubicacion   Ubicaciones @relation(fields: [ubicacionId], references: [id])
+  ubicacionId String
+  solicitud   Solicitudes @relation(fields: [solicitudId], references: [id])
+  solicitudId String
+}
+
+model Ubicaciones {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items     Items[]
+  // Para los dotos siguientes, se deben crear las tablas correspondientes 
+  // sector         String
+  // En particular, este tipo de dato se puede derivar en un enum
+  // https://www.prisma.io/docs/orm/prisma-schema/data-model/models#defining-enums
+  // tipoDeUbicacion String
+}
+
+// Las notificionaciones no se almacenan en la base de datos
+// Se pueden derivar a partir de las solicitudes
+// y su visibilidad por parte de los usuarios puede almacenarse en la 
+// local storage del navegador
+//
+// model Notificaciones {
+//   id        String       @id @default(uuid())
+//   createdAt DateTime     @default(now())
+//   updatedAt DateTime     @updatedAt
+//   solicitud Solicitudes?
+// }
+
+// Hasta que no se justifique la razon de esta tabla
+// queda comentada para evitar la creacion de tablas innecesarias
+// Consultar con las personas que esten a cargo cual era su proposito
+//
+// model ItemsEnUbicacion {
+//   id        String      @id @default(uuid())
+//   createdAt DateTime    @default(now())
+//   updatedAt DateTime    @updatedAt
+//   cantidad  Int
+//   item      Items
+//   ubicacion Ubicaciones 
+// }
